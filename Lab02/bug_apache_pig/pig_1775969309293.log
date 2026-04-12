@@ -1,0 +1,35 @@
+Pig Stack Trace
+---------------
+ERROR 6000: <file ./apache_pig/task1.pig, line 40, column 0> Output Location Validation Failed for: 'file:///mnt/d/code_nam_3/big_data/thuc_hanh_lab2/ThanhAn/output/output1 More info to follow:
+Output directory file:/mnt/d/code_nam_3/big_data/thuc_hanh_lab2/ThanhAn/output/output1 already exists
+
+org.apache.pig.impl.plan.VisitorException: ERROR 6000: <file ./apache_pig/task1.pig, line 40, column 0> Output Location Validation Failed for: 'file:///mnt/d/code_nam_3/big_data/thuc_hanh_lab2/ThanhAn/output/output1 More info to follow:
+Output directory file:/mnt/d/code_nam_3/big_data/thuc_hanh_lab2/ThanhAn/output/output1 already exists
+	at org.apache.pig.newplan.logical.visitor.InputOutputFileValidatorVisitor.visit(InputOutputFileValidatorVisitor.java:95)
+	at org.apache.pig.newplan.logical.relational.LOStore.accept(LOStore.java:99)
+	at org.apache.pig.newplan.DepthFirstWalker.depthFirst(DepthFirstWalker.java:64)
+	at org.apache.pig.newplan.DepthFirstWalker.depthFirst(DepthFirstWalker.java:66)
+	at org.apache.pig.newplan.DepthFirstWalker.depthFirst(DepthFirstWalker.java:66)
+	at org.apache.pig.newplan.DepthFirstWalker.depthFirst(DepthFirstWalker.java:66)
+	at org.apache.pig.newplan.DepthFirstWalker.depthFirst(DepthFirstWalker.java:66)
+	at org.apache.pig.newplan.DepthFirstWalker.depthFirst(DepthFirstWalker.java:66)
+	at org.apache.pig.newplan.DepthFirstWalker.depthFirst(DepthFirstWalker.java:66)
+	at org.apache.pig.newplan.DepthFirstWalker.walk(DepthFirstWalker.java:53)
+	at org.apache.pig.newplan.PlanVisitor.visit(PlanVisitor.java:52)
+	at org.apache.pig.newplan.logical.relational.LogicalPlan.validate(LogicalPlan.java:215)
+	at org.apache.pig.PigServer$Graph.compile(PigServer.java:1860)
+	at org.apache.pig.PigServer$Graph.access$300(PigServer.java:1536)
+	at org.apache.pig.PigServer.execute(PigServer.java:1445)
+	at org.apache.pig.PigServer.executeBatch(PigServer.java:489)
+	at org.apache.pig.PigServer.executeBatch(PigServer.java:472)
+	at org.apache.pig.tools.grunt.GruntParser.executeBatch(GruntParser.java:172)
+	at org.apache.pig.tools.grunt.GruntParser.parseStopOnError(GruntParser.java:235)
+	at org.apache.pig.tools.grunt.GruntParser.parseStopOnError(GruntParser.java:206)
+	at org.apache.pig.tools.grunt.Grunt.exec(Grunt.java:81)
+	at org.apache.pig.Main.run(Main.java:500)
+	at org.apache.pig.Main.main(Main.java:175)
+Caused by: org.apache.hadoop.mapred.FileAlreadyExistsException: Output directory file:/mnt/d/code_nam_3/big_data/thuc_hanh_lab2/ThanhAn/output/output1 already exists
+	at org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.checkOutputSpecs(FileOutputFormat.java:164)
+	at org.apache.pig.newplan.logical.visitor.InputOutputFileValidatorVisitor.visit(InputOutputFileValidatorVisitor.java:69)
+	... 22 more
+================================================================================

@@ -1,0 +1,66 @@
+KẾT LUẬN KHI SỬ DỤNG APACHE PIG TRÊN WINDOWS (LOCAL MODE):
+Sau nhiều lần thử nghiệm chạy Apache Pig 0.18.0 trên Windows (Git Bash),
+các file log lỗi đã ghi nhận các vấn đề sau:
+
+1. pig_bug1.log — Lỗi thiếu thư viện (NoClassDefFoundError)
+   Lỗi : NoClassDefFoundError: org/apache/commons/text/lookup/StringLookupFactory
+   Nguyên nhân: Pig 0.18.0 phụ thuộc vào commons-configuration2, thư viện này
+                lại cần commons-text. Khi classpath không được nạp đúng thứ tự
+                trên Windows, JVM không tìm thấy class cần thiết.
+   Nhận xét   : Lỗi này xuất phát từ việc Pig được thiết kế chạy trên Linux,
+                nơi classpath được quản lý bởi Hadoop scripts.
+
+2. pig_1775969142376.log — Lỗi output đã tồn tại (FileAlreadyExistsException)
+   Lỗi : ERROR 6000: Output directory ... already exists
+   Nguyên nhân: Pig (giống Hadoop) không cho phép ghi đè output directory.
+                Nếu chạy lại mà không xóa output cũ, Pig sẽ từ chối thực thi.
+   Nhận xét   : Đây là thiết kế có chủ đích của Hadoop để tránh mất dữ liệu,
+                nhưng gây bất tiện khi phát triển/debug. Cần xóa output trước
+                mỗi lần chạy (rm -rf).
+
+3. pig_1775993003063.log — Lỗi thiếu HADOOP_HOME và winutils.exe
+   Lỗi : HADOOP_HOME and hadoop.home.dir are unset
+   Nguyên nhân: Pig chạy trên nền Hadoop MapReduce. Trên Windows, Hadoop cần
+                file winutils.exe để thao tác với hệ thống file (set permission,
+                tạo thư mục staging...). Nếu không có HADOOP_HOME trỏ đến thư
+                mục chứa bin/winutils.exe, toàn bộ pipeline sẽ crash.
+   Nhận xét   : winutils.exe là file nhị phân do cộng đồng biên dịch riêng
+                cho Windows, không có trong bản phân phối chính thức của Hadoop.
+
+4. pig_1775993206826.log — Lỗi Job không khởi chạy được (Job in state DEFINE)
+   Lỗi : Job in state DEFINE instead of RUNNING
+   Nguyên nhân: Dù đã có winutils.exe và đầy đủ biến môi trường, Hadoop
+                MapReduce local runner vẫn không thể submit job trên Windows.
+                Lỗi xảy ra ở tầng sâu nhất (JobSubmitter) khi Hadoop
+                cố gắng tạo staging directory và set permission theo chuẩn
+                POSIX — thứ mà Windows không hỗ trợ đầy đủ.
+   Nhận xét   : Đây là lỗi KHÔNG THỂ KHẮC PHỤC trên Windows native.
+                Ngay cả Apache cũng không chính thức hỗ trợ chạy Pig/Hadoop
+                trên Windows.
+
+
+KẾT LUẬN CHUNG
+
+   Apache Pig KHÔNG phù hợp để chạy trực tiếp trên Windows vì:
+
+   1. Pig phụ thuộc hoàn toàn vào Hadoop MapReduce engine.
+   2. Hadoop được thiết kế cho hệ điều hành Linux (POSIX filesystem).
+   3. Trên Windows, ngay cả ở chế độ local mode (-x local), Hadoop vẫn
+      yêu cầu winutils.exe, quyền POSIX, và các thư mục staging mà
+      Windows không cung cấp đầy đủ.
+   4. Chuỗi lỗi leo thang: thiếu biến môi trường -> thiếu winutils ->
+      không submit được job -> kết quả là KHÔNG BAO GIỜ chạy được.
+
+   GIẢI PHÁP THAY THẾ ĐÃ ÁP DỤNG:
+   - Viết main.py (Python thuần) mô phỏng hoàn toàn logic xử lý của
+     các script Pig (task_1.pig -> task_5.pig).
+   - Kết quả đầu ra (output/*.csv) hoàn toàn tương đương.
+   - File main.sh gọi python main.py để vẫn đảm bảo yêu cầu chạy bằng
+     shell script.
+
+   MÔI TRƯỜNG PHÙ HỢP ĐỂ CHẠY PIG:
+   - Linux (Ubuntu, CentOS...)
+   - Docker container chạy image có sẵn Hadoop + Pig
+   - WSL2 với Hadoop được cài đặt đầy đủ bên trong
+
+================================================================================
